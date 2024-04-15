@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{.ObjectMeta.Name}}-headless
+  namespace: {{.ObjectMeta.Namespace}}
+  labels:
+    app: {{.ObjectMeta.Name}}-headless
+spec:
+  ports:
+    - name: {{.ObjectMeta.Name}}-headless
+      port: 3306
+  clusterIP: None
+  selector:
+    app: {{.ObjectMeta.Name}}-mysql

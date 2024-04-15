@@ -1,0 +1,39 @@
+apiVersion: mysql.github.com/v1
+kind: Mysqlrwha
+metadata:
+  labels:
+    app.kubernetes.io/name: mysqlrwha
+    app.kubernetes.io/instance: mysqlrwha-sample
+    app.kubernetes.io/part-of: mysql-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: mysql-operator
+  name: mysqlrwha
+  namespace: default
+spec:
+  mysql:
+    mysqlimage: "registry.cn-chengdu.aliyuncs.com/hhjwqh/mysql:5.7"
+    mysqlreplicas: 3
+    xtrabackupimage: "ist0ne/xtrabackup:1.0"
+    mysqlmem: 1Gi
+    mysqlcpu: 500m
+    mysqlstoragename: nfs
+    mysqlstoragemax:  10Gi
+    mysqlrootpassword: "123456a"
+    mysqlreplicauser:  "replic"
+    mysqlreplicapwd: "123456a"
+    mysqldatabase: "test"
+    replicadb: ["test"]
+    ingnoredb: ["mysql"]
+  mycat:
+    mycatimage: "longhronshens/mycat-docker:latest"
+    mycatreplicas: 2
+    mycatmem: 1Gi
+    mycatcpu: 500m
+    mysqlwriteuser: writeuser
+    mysqlwritepwd: "123456"
+    mycatwriteuser: readuser
+    mycatwritepwd:  "1234567"
+    mycatreaddb: ["TEST","TEST1"]
+    mycatwritedb: ["TEST","TEST1","TEST2"]
+    mycatrwdb: {TEST: "test",MYSQL: "mysql"}
+  imagepullpolicy: IfNotPresent

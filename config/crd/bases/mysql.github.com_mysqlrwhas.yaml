@@ -1,0 +1,150 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.11.1
+  creationTimestamp: null
+  name: mysqlrwhas.mysql.github.com
+spec:
+  group: mysql.github.com
+  names:
+    kind: Mysqlrwha
+    listKind: MysqlrwhaList
+    plural: mysqlrwhas
+    singular: mysqlrwha
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: Mysqlrwha is the Schema for the mysqlrwhas API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              imagepullpolicy:
+                type: string
+              mycat:
+                properties:
+                  mycatcpu:
+                    type: string
+                  mycatimage:
+                    type: string
+                  mycatmem:
+                    type: string
+                  mycatreaddb:
+                    description: 只读mycat逻辑库
+                    items:
+                      type: string
+                    type: array
+                  mycatreplicas:
+                    format: int32
+                    type: integer
+                  mycatrwdb:
+                    additionalProperties:
+                      type: string
+                    description: 访问mycat逻辑库(key)及与mysql对应的数据库,其中key要与读写的权限的逻辑库一致
+                    type: object
+                  mycatwritedb:
+                    description: 读写mycat逻辑库
+                    items:
+                      type: string
+                    type: array
+                  mycatwritepwd:
+                    type: string
+                  mycatwriteuser:
+                    type: string
+                  mysqlwritepwd:
+                    type: string
+                  mysqlwriteuser:
+                    description: 访问mycat的用户密码
+                    type: string
+                required:
+                - mycatcpu
+                - mycatmem
+                - mycatreaddb
+                - mycatrwdb
+                - mycatwritedb
+                - mycatwritepwd
+                - mycatwriteuser
+                - mysqlwritepwd
+                - mysqlwriteuser
+                type: object
+              mysql:
+                description: MysqlrwhaSpec defines the desired state of Mysqlrwha
+                properties:
+                  ingnoredb:
+                    description: 忽略同步的数据库列表
+                    items:
+                      type: string
+                    type: array
+                  mysqlcpu:
+                    type: string
+                  mysqldatabase:
+                    description: mysql初始化数据库名
+                    type: string
+                  mysqlimage:
+                    type: string
+                  mysqlmem:
+                    type: string
+                  mysqlreplicapwd:
+                    type: string
+                  mysqlreplicas:
+                    format: int32
+                    type: integer
+                  mysqlreplicauser:
+                    description: mysql主从同步的用户及密码
+                    type: string
+                  mysqlrootpassword:
+                    description: mysql的root用户初始化密码
+                    type: string
+                  mysqlstoragemax:
+                    type: string
+                  mysqlstoragename:
+                    type: string
+                  replicadb:
+                    description: 需同步的数据库列表
+                    items:
+                      type: string
+                    type: array
+                  xtrabackupimage:
+                    type: string
+                required:
+                - mysqlcpu
+                - mysqldatabase
+                - mysqlimage
+                - mysqlmem
+                - mysqlreplicapwd
+                - mysqlreplicas
+                - mysqlreplicauser
+                - mysqlrootpassword
+                - mysqlstoragemax
+                - mysqlstoragename
+                - replicadb
+                - xtrabackupimage
+                type: object
+            required:
+            - imagepullpolicy
+            - mycat
+            - mysql
+            type: object
+          status:
+            description: MysqlrwhaStatus defines the observed state of Mysqlrwha
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

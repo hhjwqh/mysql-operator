@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+  labels:
+    app: {{.ObjectMeta.Name}}-mycat
+  name: {{.ObjectMeta.Name}}-mycat
+  namespace: {{.ObjectMeta.Namespace}}
+spec:
+  replicas: {{.Spec.Mycat.MycatReplicas}}
+  selector:
+    matchLabels:
+      app: {{.ObjectMeta.Name}}-mycat
+  template:
+    metadata:
+      annotations:
+      labels:
+        app: {{.ObjectMeta.Name}}-mycat
+    spec:
+      containers:
+        - image: {{.Spec.Mycat.Mycatimage}}
+          imagePullPolicy: {{.Spec.ImagePullPolicy}}
+          name: {{.ObjectMeta.Name}}-mycat
+          resources:
+            limits:
+              cpu: {{.Spec.Mycat.MycatCpu}}
+              memory: {{.Spec.Mycat.MycatMem}}
+            requests:
+              cpu: 10m
+              memory: 100Mi
+          ports:
+            - containerPort: 8066
+              protocol: TCP
+              name: mycat
+          volumeMounts:
+            - name: {{.ObjectMeta.Name}}-mycat-configmap
+              mountPath: /usr/local/mycat/conf/server.xml
+              subPath: server.xml
+            - name: {{.ObjectMeta.Name}}-mycat-configmap
+              mountPath: /usr/local/mycat/conf/schema.xml
+              subPath: schema.xml
+      volumes:
+        - name: {{.ObjectMeta.Name}}-mycat-configmap
+          configMap:
+            name: {{.ObjectMeta.Name}}-mycat-configmap
+            items:
+              - key: server.xml
+                path: server.xml
+              - key: schema.xml
+                path: schema.xml
