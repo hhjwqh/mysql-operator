@@ -22,7 +22,7 @@ spec:
     mysqlreplicauser:  "replic"
     mysqlreplicapwd: "123456a"
     mysqldatabase: "test"
-    replicadb: ["test"]
+    replicadb: ["test","test1"]
     ingnoredb: ["mysql"]
   mycat:
 #    mycatimage: "longhronshens/mycat-docker:latest"

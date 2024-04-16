@@ -51,6 +51,7 @@ type MysqlrwhaReconciler struct {
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.14.1/pkg/reconcile
+
 func (r *MysqlrwhaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	app := &mysqlv1.Mysqlrwha{}
@@ -101,26 +102,26 @@ func (r *MysqlrwhaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	//3. mysqlstatefulset的处理
 	statefulset := utils.NewStatefullset(app)
 	for _, v := range statefulset.Spec.Template.Spec.Containers {
-		for i, _ := range v.Command {
+		for i := range v.Command {
 			v.Command[i] = strings.Replace(v.Command[i], "Mysql-Master-headless", app.Name+"-mysql-0."+app.Name+"-headless", -1)
 			v.Command[i] = strings.Replace(v.Command[i], "MysqlRootPassword", app.Spec.Mysql.MysqlRootPassword, -1)
 			v.Command[i] = strings.Replace(v.Command[i], "ObjectMeta-Pod-Name", app.Name+"-mysql", -1)
 			v.Command[i] = strings.Replace(v.Command[i], "ObjectMeta-Name-headless", app.Name+"-headless", -1)
 		}
 		if v.LivenessProbe != nil && v.LivenessProbe.Exec != nil && len(v.LivenessProbe.Exec.Command) > 0 {
-			for m, _ := range v.LivenessProbe.Exec.Command {
+			for m := range v.LivenessProbe.Exec.Command {
 				v.LivenessProbe.Exec.Command[m] = strings.Replace(v.LivenessProbe.Exec.Command[m], "MysqlRootPassword", app.Spec.Mysql.MysqlRootPassword, -1)
 			}
 		}
 		if v.ReadinessProbe != nil && v.ReadinessProbe.Exec != nil && len(v.ReadinessProbe.Exec.Command) > 0 {
-			for l, _ := range v.ReadinessProbe.Exec.Command {
+			for l := range v.ReadinessProbe.Exec.Command {
 				v.ReadinessProbe.Exec.Command[l] = strings.Replace(v.ReadinessProbe.Exec.Command[l], "MysqlRootPassword", app.Spec.Mysql.MysqlRootPassword, -1)
 			}
 		}
 
 	}
 	for _, v := range statefulset.Spec.Template.Spec.InitContainers {
-		for i, _ := range v.Command {
+		for i := range v.Command {
 			v.Command[i] = strings.Replace(v.Command[i], "Mysql-Master-headless", app.Name+"-mysql-0."+app.Name+"-headless", -1)
 			v.Command[i] = strings.Replace(v.Command[i], "MysqlRootPassword", app.Spec.Mysql.MysqlRootPassword, -1)
 			v.Command[i] = strings.Replace(v.Command[i], "ObjectMeta-Pod-Name", app.Name+"-mysql", -1)
@@ -213,5 +214,9 @@ func (r *MysqlrwhaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 func (r *MysqlrwhaReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&mysqlv1.Mysqlrwha{}).
+		Owns(&appv1.StatefulSet{}).
+		Owns(&appv1.Deployment{}).
+		Owns(&corev1.Service{}).
+		Owns(&corev1.ConfigMap{}).
 		Complete(r)
 }
