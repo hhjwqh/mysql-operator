@@ -7,6 +7,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/yaml"
 	"strconv"
+
 	"strings"
 	"text/template"
 )
@@ -156,37 +157,37 @@ func NewMycatConfigmap(app *v1.Mysqlrwha) *corev1.ConfigMap {
 
 	m := make(map[string]string)
 	server := `
-	<?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE mycat:server SYSTEM "server.dtd">
-    <mycat:server xmlns:mycat="http://io.mycat/">
-            <system>
-            <property name="nonePasswordLogin">0</property> <!-- 0为需要密码登陆、1为不需要密码登陆 ,默认为0，设置为1则需要指定默认账户-->
-            <property name="useHandshakeV10">1</property>
-            <property name="useSqlStat">0</property>  <!-- 1为开启实时统计、0为关闭 -->
-            <property name="useGlobleTableCheck">0</property>  <!-- 1为开启全加班一致性检测、0为关闭 -->
-            <property name="sequnceHandlerType">2</property>
-            <property name="subqueryRelationshipCheck">false</property> <!-- 子查询中存在关联查询的情况下,检查关联字段中是否有分片字段 .默认 false -->
-                    <property name="processorBufferPoolType">0</property>
-                    <property name="handleDistributedTransactions">0</property>
-                    <property name="useOffHeapForMerge">1</property>
-                    <property name="memoryPageSize">64k</property>
-                    <property name="spillsFileBufferSize">1k</property>
-                    <property name="useStreamOutput">0</property>
-                    <property name="systemReserveMemorySize">384m</property>
-                    <property name="useZKSwitch">false</property>
-                    <property name="strictTxIsolation">false</property>
-                    <property name="useZKSwitch">true</property>
-            </system>
-            <user name="WRITEUSER" >
-                    <property name="password">WRITEPWD</property>
-                    <property name="schemas">WRITEDBS</property>
-            </user>
-            <user name="READUSER">
-                    <property name="password">READPWD</property>
-                    <property name="schemas">READDBS</property>
-                    <property name="readOnly">true</property>
-            </user>
-    </mycat:server>
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mycat:server SYSTEM "server.dtd">
+<mycat:server xmlns:mycat="http://io.mycat/">
+		<system>
+		<property name="nonePasswordLogin">0</property> <!-- 0为需要密码登陆、1为不需要密码登陆 ,默认为0，设置为1则需要指定默认账户-->
+		<property name="useHandshakeV10">1</property>
+		<property name="useSqlStat">0</property>  <!-- 1为开启实时统计、0为关闭 -->
+		<property name="useGlobleTableCheck">0</property>  <!-- 1为开启全加班一致性检测、0为关闭 -->
+		<property name="sequnceHandlerType">2</property>
+		<property name="subqueryRelationshipCheck">false</property> <!-- 子查询中存在关联查询的情况下,检查关联字段中是否有分片字段 .默认 false -->
+				<property name="processorBufferPoolType">0</property>
+				<property name="handleDistributedTransactions">0</property>
+				<property name="useOffHeapForMerge">1</property>
+				<property name="memoryPageSize">64k</property>
+				<property name="spillsFileBufferSize">1k</property>
+				<property name="useStreamOutput">0</property>
+				<property name="systemReserveMemorySize">384m</property>
+				<property name="useZKSwitch">false</property>
+				<property name="strictTxIsolation">false</property>
+				<property name="useZKSwitch">true</property>
+		</system>
+		<user name="WRITEUSER" >
+				<property name="password">WRITEPWD</property>
+				<property name="schemas">WRITEDBS</property>
+		</user>
+		<user name="READUSER">
+				<property name="password">READPWD</property>
+				<property name="schemas">READDBS</property>
+				<property name="readOnly">true</property>
+		</user>
+</mycat:server>
 	`
 	writedbs := strings.Join(app.Spec.Mycat.Mycatwritedb, ",")
 	readdbs := strings.Join(app.Spec.Mycat.Mycatreaddb, ",")
@@ -199,27 +200,22 @@ func NewMycatConfigmap(app *v1.Mysqlrwha) *corev1.ConfigMap {
 
 	m["server.xml"] = server
 
-	schema1 := `
-    <?xml version="1.0"?>
-    <!DOCTYPE mycat:schema SYSTEM "schema.dtd">
-    <mycat:schema xmlns:mycat="http://io.mycat/">
-	`
-
+	schema1 := `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mycat:schema SYSTEM "schema.dtd">
+<mycat:schema xmlns:mycat="http://io.mycat/">`
 	mycatdbs := ""
 	if len(app.Spec.Mycat.Mycatrwdb) > 0 {
 		n := 1
 		for key, v := range app.Spec.Mycat.Mycatrwdb {
-			mycatstr := `
-			<schema name="MYCATDB" checkSQLschema="false" sqlMaxLimit="1000" dataNode="DATENODEDDD">
-			</schema>
-			<dataNode name="DATENODEDDD" dataHost="MYCATLOCALHOST" database="MYSQLDATABASE" />
-			<dataHost name="MYCATLOCALHOST" maxCon="2000" minCon="20" balance="3" writeType="0" dbType="mysql" dbDriver="native" switchType="1"  slaveThreshold="100">
-					 <heartbeat>select user()</heartbeat>
-					<writeHost host="hostM0" url="MYSQLHOST:3306" user="root" password="MysqlRootPassword">
-                        READHOST
-					 </writeHost> 
-				  </dataHost>
-			`
+			mycatstr := `     <schema name="MYCATDB" checkSQLschema="false" sqlMaxLimit="100" dataNode="DATENODEDDD">
+        </schema>
+	   <dataNode name="DATENODEDDD" dataHost="MYCATLOCALHOST" database="MYSQLDATABASE" />
+	   <dataHost name="MYCATLOCALHOST" maxCon="200" minCon="20" balance="3" writeType="0" dbType="mysql" dbDriver="native" switchType="1"  slaveThreshold="100">
+	           <heartbeat>select user()</heartbeat>
+	           <writeHost host="hostM0" url="MYSQLHOST:3306" user="root" password="MysqlRootPassword">
+                   READHOST
+	           </writeHost>
+	   </dataHost>`
 			readstr := `<readHost host="HOSTS" url="READDBHOST:3306" user="root" password="MysqlRootPassword" />`
 			ndstr := "dn" + strconv.Itoa(n)
 			host := "localhost" + strconv.Itoa(n)
@@ -233,7 +229,11 @@ func NewMycatConfigmap(app *v1.Mysqlrwha) *corev1.ConfigMap {
 					read := strings.Replace(readstr, "MysqlRootPassword", app.Spec.Mysql.MysqlRootPassword, -1)
 					read = strings.Replace(read, "HOSTS", hosts, -1)
 					read = strings.Replace(read, "READDBHOST", urlstr, -1)
-					readstrs = readstrs + read + "\n\t\t\t\t\t"
+					if i+1 >= int(app.Spec.Mysql.MysqlReplicas) {
+						readstrs = readstrs + read
+					} else {
+						readstrs = readstrs + read + "\n                 "
+					}
 				}
 			}
 			mycatstr = strings.Replace(mycatstr, "MysqlRootPassword", app.Spec.Mysql.MysqlRootPassword, -1)
@@ -243,16 +243,43 @@ func NewMycatConfigmap(app *v1.Mysqlrwha) *corev1.ConfigMap {
 			mycatstr = strings.Replace(mycatstr, "MYSQLDATABASE", v, -1)
 			mycatstr = strings.Replace(mycatstr, "MYSQLHOST", mysqlhost0str, -1)
 			mycatstr = strings.Replace(mycatstr, "READHOST", readstrs, -1)
-			mycatdbs = mycatdbs + mycatstr + "\n\t\t\t"
-
+			if n+1 >= len(app.Spec.Mycat.Mycatrwdb) {
+				mycatdbs = mycatdbs + mycatstr
+			} else {
+				mycatdbs = mycatdbs + mycatstr + "\n              "
+			}
+			n = n + 1
 		}
 
 	}
 	m["schema.xml"] = schema1 + "\n" + mycatdbs + "\n</mycat:schema>"
+
 	c.Data = m
+	//// 将数据结构转换为 YAML 格式
+	//yamlData, err := y.Marshal(&c)
+	//if err != nil {
+	//	log.Fatalf("error: %v", err)
+	//}
+	//
+	//// 将 YAML 数据写入文件
+	//err = os.WriteFile("controllers/template/mycaoconfig.yaml", yamlData, 0644)
+	//if err != nil {
+	//	log.Fatalf("error: %v", err)
+	//}
 	return c
 }
 
+func NewMycatConfigmapb(app *v1.Mysqlrwha) *corev1.ConfigMap {
+	c := &corev1.ConfigMap{}
+	c.ObjectMeta.Name = app.ObjectMeta.Name + "-mycat-configmap"
+	c.ObjectMeta.Namespace = app.ObjectMeta.Namespace
+	err := yaml.Unmarshal(parseTemplate("mycatconfigmap", app), c)
+	if err != nil {
+		panic(err)
+	}
+
+	return c
+}
 func NewMycatService(app *v1.Mysqlrwha) *corev1.Service {
 	s := &corev1.Service{}
 	err := yaml.Unmarshal(parseTemplate("mycatservice", app), s)

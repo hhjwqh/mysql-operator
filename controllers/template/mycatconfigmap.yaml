@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{.ObjectMeta.Name}}-mycat-configmap
+  namespace: {{.ObjectMeta.Namespace}}
+data:
+  server.xml: |-
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE mycat:server SYSTEM "server.dtd">
+    <mycat:server xmlns:mycat="http://io.mycat/">
+            <system>
+            <property name="nonePasswordLogin">0</property> <!-- 0为需要密码登陆、1为不需要密码登陆 ,默认为0，设置为1则需要指定默认账户-->
+            <property name="useHandshakeV10">1</property>
+            <property name="useSqlStat">0</property>  <!-- 1为开启实时统计、0为关闭 -->
+            <property name="useGlobleTableCheck">0</property>  <!-- 1为开启全加班一致性检测、0为关闭 -->
+            <property name="sequnceHandlerType">2</property>
+            <property name="subqueryRelationshipCheck">false</property> <!-- 子查询中存在关联查询的情况下,检查关联字段中是否有分片字段 .默认 false -->
+                    <property name="processorBufferPoolType">0</property>
+                    <property name="handleDistributedTransactions">0</property>
+                    <property name="useOffHeapForMerge">1</property>
+                    <property name="memoryPageSize">64k</property>
+                    <property name="spillsFileBufferSize">1k</property>
+                    <property name="useStreamOutput">0</property>
+                    <property name="systemReserveMemorySize">384m</property>
+                    <property name="useZKSwitch">false</property>
+                    <property name="strictTxIsolation">false</property>
+                    <property name="useZKSwitch">true</property>
+            </system>
+            <user name="root" >
+                    <property name="password">123456</property>
+                    <property name="schemas">test</property>
+            </user>
+            <user name="user">
+                    <property name="password">123456</property>
+                    <property name="schemas">test</property>
+                    <property name="readOnly">true</property>
+            </user>
+    </mycat:server>
+  schema.xml: |-
+    <?xml version="1.0"?>
+    <!DOCTYPE mycat:schema SYSTEM "schema.dtd">
+    <mycat:schema xmlns:mycat="http://io.mycat/">
+      <schema name="test" checkSQLschema="false" sqlMaxLimit="100" dataNode="dn1">
+      </schema>
+      <dataNode name="dn1" dataHost="localhost1" database="test" />
+      <dataHost name="localhost1" maxCon="200" minCon="20" balance="3" writeType="0" dbType="mysql" dbDriver="native" switchType="1"  slaveThreshold="100">
+           <heartbeat>select user()</heartbeat>
+          <writeHost host="hostM0" url="mysqlrwha-mysql-0.mysqlrwha-headless:3306" user="root" password="123456a">
+            <readHost host="hostM1" url="mysqlrwha-mysql-1.mysqlrwha-headless:3306" user="root" password="123456a" />
+            <readHost host="hostM2" url="mysqlrwha-mysql-2.mysqlrwha-headless:3306" user="root" password="123456a" />
+           </writeHost>
+      </dataHost>
+    </mycat:schema>

@@ -147,7 +147,8 @@ func (r *MysqlrwhaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		}
 	}
 	//4. 处理mycatconfigmap
-	mycatconfigmap := utils.NewMycatConfigmap(app)
+	mycatconfigmap := utils.NewMycatConfigmapb(app)
+	//fmt.Println(mycatconfigmap)
 	if err := controllerutil.SetControllerReference(app, mycatconfigmap, r.Scheme); err != nil {
 		return ctrl.Result{}, err
 	}

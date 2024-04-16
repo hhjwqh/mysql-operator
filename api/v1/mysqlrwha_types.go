@@ -54,11 +54,11 @@ type Mycat struct {
 	MycatWritePwd  string `json:"mysqlwritepwd"`
 	MycatReadUser  string `json:"mycatwriteuser"`
 	MycatReadPwd   string `json:"mycatwritepwd"`
-	//只读mycat逻辑库
+	//只读mycat逻辑库,逻辑库名不能大写
 	Mycatreaddb []string `json:"mycatreaddb"`
-	//读写mycat逻辑库
+	//读写mycat逻辑库,逻辑库名不能大写
 	Mycatwritedb []string `json:"mycatwritedb"`
-	// 访问mycat逻辑库(key)及与mysql对应的数据库,其中key要与读写的权限的逻辑库一致
+	// 访问mycat逻辑库(key)及与mysql对应的数据库,其中key要与读写的权限的逻辑库一致,逻辑库名不能大写
 	Mycatrwdb map[string]string `json:"mycatrwdb"`
 }
 type MysqlrwhaSpec struct {

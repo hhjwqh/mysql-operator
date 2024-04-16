@@ -45,7 +45,7 @@ spec:
                   mycatmem:
                     type: string
                   mycatreaddb:
-                    description: 只读mycat逻辑库
+                    description: 只读mycat逻辑库,逻辑库名不能大写
                     items:
                       type: string
                     type: array
@@ -55,10 +55,10 @@ spec:
                   mycatrwdb:
                     additionalProperties:
                       type: string
-                    description: 访问mycat逻辑库(key)及与mysql对应的数据库,其中key要与读写的权限的逻辑库一致
+                    description: 访问mycat逻辑库(key)及与mysql对应的数据库,其中key要与读写的权限的逻辑库一致,逻辑库名不能大写
                     type: object
                   mycatwritedb:
-                    description: 读写mycat逻辑库
+                    description: 读写mycat逻辑库,逻辑库名不能大写
                     items:
                       type: string
                     type: array

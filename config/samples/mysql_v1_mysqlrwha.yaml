@@ -25,15 +25,16 @@ spec:
     replicadb: ["test"]
     ingnoredb: ["mysql"]
   mycat:
+#    mycatimage: "longhronshens/mycat-docker:latest"
     mycatimage: "longhronshens/mycat-docker:latest"
-    mycatreplicas: 2
+    mycatreplicas: 1
     mycatmem: 1Gi
     mycatcpu: 500m
     mysqlwriteuser: writeuser
     mysqlwritepwd: "123456"
     mycatwriteuser: readuser
     mycatwritepwd:  "1234567"
-    mycatreaddb: ["TEST","TEST1"]
-    mycatwritedb: ["TEST","TEST1","TEST2"]
-    mycatrwdb: {TEST: "test",MYSQL: "mysql"}
+    mycatreaddb: ["tes"]
+    mycatwritedb: ["test2"]
+    mycatrwdb: {test: "test"}
   imagepullpolicy: IfNotPresent
